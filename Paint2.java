@@ -13,7 +13,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-
+//this is a comment
 public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/*MouseMotionListener, MouseListener,*/  {
     
     PadDraw drawPad = new PadDraw(this);
