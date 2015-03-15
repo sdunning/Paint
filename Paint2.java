@@ -80,10 +80,9 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
           catch (IllegalAccessException e) {}
         
         JFrame frame = new JFrame("Paint It");
-        //frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setSize(635, 600);
         frame.setBackground(new Color(180, 180, 180));
-        //Creates a frame with a title of "Paint it"
         Paint2 app = new Paint2();
         app.init();
         frame.getContentPane().add(app);
@@ -96,8 +95,9 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     public void init() {
         Container c = getContentPane();
         c.setSize(1100, 700);
-
         c.setLayout(new BorderLayout() );
+        c.setBackground(bgGUI);
+        
         initSliders();
         //panWest.add(sldBrushSize);
         //panWest.setBackground(bgGUI);
@@ -143,7 +143,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
         subEast.setLayout(new BorderLayout());
         subEast.setBackground(bgGUI);
         subSubEast.setLayout( new GridLayout(2, 7) );
-        //subSubEast.setBackground(bgGUI);
+        subSubEast.setBackground(bgGUI);
         subSubEast.add(colorBox);
         subSubEast.add(backGround);
         subSubEast.add(open);
@@ -332,7 +332,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
 class PadDraw extends JComponent{
     BufferedImage image;
     Paint2 paint2;
-    private int height = 700, width = 1200;
+    private int height = 700, width = 1000;
     Graphics2D graphics2D;
     private int currentX, currentY, oldX, oldY,
                 oldLineX, oldLineY, newLineX, newLineY;
