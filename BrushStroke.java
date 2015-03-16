@@ -16,6 +16,7 @@ public class BrushStroke implements Serializable{
     private int brushSize = 0;
     private int red = 0, green = 0, blue = 0, alpha = 0;
     private Color color = null;
+    private String user = "";
     
     private void colorSeperator() {
         if (color != null) {
@@ -26,15 +27,16 @@ public class BrushStroke implements Serializable{
         }
     }
     
-    public BrushStroke(int x, int y, int type, int size, Color color) {
-        oldX = x; oldY = y; brushType = type; brushSize = size; this.color = color;
+    public BrushStroke(int x, int y, int type, int size, Color color, String user) {
+        oldX = x; oldY = y; brushType = type; brushSize = size; this.color = color; this.user = user;
         colorSeperator();
     }
-    public BrushStroke(int oldX, int newX, int oldY, int newY, int type, int size, Color color) {
+    public BrushStroke(int oldX, int newX, int oldY, int newY, int type, int size, Color color, String user) {
         this.oldX = oldX; this.newX = newX;
         this.oldY = oldY; this.newY = newY;
         brushType = type; brushSize = size;
         this.color = color; colorSeperator();
+        this.user = user;
     }
     
     public void setX(int x)           { oldX = x; }
@@ -48,6 +50,7 @@ public class BrushStroke implements Serializable{
     public void setType(int type)     { brushType = type; }
     public void setSize(int size)     { brushSize = size; }
     public void setColor(Color color) { this.color = color; colorSeperator(); }
+    public void setUser(String user)  { this.user = user; }
     
     public int getX()           { return oldX; }
     public int getY()           { return oldY; }
@@ -62,10 +65,10 @@ public class BrushStroke implements Serializable{
     public int getGreen()       { return green; }
     public int getBlue()        { return blue; }
     public int getAlpha()       { return alpha; }
-    
+    public String getUser()     { return user; }    
     @Override
     public String toString() {
-        return String.format("oldX=%4d | oldY=%4d | newX=%4d | newY=%4d | brushType=%4d | brushSize=%4d | red=%4d | green=%4d | blue=%4d | alpha=%4d",
-                              oldX, oldY, newX, newY, brushType, brushSize, red, green, blue, alpha);
+        return String.format("user=%8s | oldX=%4d | oldY=%4d | newX=%4d | newY=%4d \n | brushType=%4d | brushSize=%4d | red=%4d | green=%4d | blue=%4d | alpha=%4d\n\n",
+                              user, oldX, oldY, newX, newY, brushType, brushSize, red, green, blue, alpha);
     }
 }

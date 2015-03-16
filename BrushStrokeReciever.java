@@ -17,8 +17,13 @@ public class BrushStrokeReciever extends Thread {
             try {
                 stroke = (BrushStroke) in.readObject();
                 System.out.printf("Receiver: [ %s ]\n", stroke);
-            } catch ( IOException e ) {e.printStackTrace();}
-              catch ( ClassNotFoundException clf) {clf.printStackTrace();}
+            } catch ( IOException e ) {
+            	e.printStackTrace();
+            	try {
+            		paint.paintSocket.close();
+					} catch (IOException e1) { e1.printStackTrace(); }
+            			}
+              catch ( ClassNotFoundException clf) {clf.printStackTrace(); }
             
             if (stroke != null) paint.drawPad.paintBrushStroke(stroke);
         }

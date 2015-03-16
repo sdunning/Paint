@@ -1,12 +1,20 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Random;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.sql.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -24,6 +32,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     
     //JColorChooser colorSelector = new JColorChooser();
     WindowedColorChooser colorChooser = new WindowedColorChooser("Pick a color...");
+    Login login = new Login("Login");
     
     JPanel  panWest = new JPanel();
     JPanel  panNorth = new JPanel();
@@ -61,6 +70,16 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     private Color current = Color.BLACK;
     private Color bgGUI = new Color(180, 180, 180);
     private File loadedImage = null;
+    private String username = "";
+    private String password = "";
+    
+    Connection         cnn = null;
+    PreparedStatement  pStmt = null;
+    Statement          stmt = null;
+    ResultSet          res = null ;
+    ResultSetMetaData  meta = null;
+
+    String url = "jdbc:oracle:thin:@delphi.cs.csubak.edu:1521:dbs01";
     
     Socket                     paintSocket = null;
     ObjectOutputStream         out = null;  
@@ -126,6 +145,8 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
         open.addActionListener(this);
         chooseColor.addActionListener(this);
         info[2].addActionListener(this);
+        login.login.addActionListener(this);
+        login.cancel.addActionListener(this);
         
         shape.setSelectedIndex(2);
         
@@ -196,15 +217,47 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
        private void connect() {
            if (connected) return;
            try {
-               paintSocket = new Socket( HOST, PORT);
-               out = new ObjectOutputStream( paintSocket.getOutputStream());
-               in = new ObjectInputStream(paintSocket.getInputStream());
-               (new Thread (new BrushStrokeReciever(in, drawPad, this))).start();
-               Thread send = new BrushStrokeSender(out, new BrushStroke(0, 0, 0, 0, -1, 0, null));
-               send.start();
-               try { send.join(); } catch (InterruptedException f )  { }
-               setConnected(true);
-           } catch(IOException er) { er.printStackTrace();; }
+               try { Class.forName("oracle.jdbc.driver.OracleDriver"); }
+               catch (ClassNotFoundException ee) { ee.printStackTrace(); System.exit(-1); }
+               cnn = DriverManager.getConnection(url, "cs342", "c3m4p2s");
+               cnn.setAutoCommit(false);
+           } catch (SQLException e ) { e.printStackTrace(); System.exit(-1); }
+           try {
+        	   if ( stmt == null ) stmt = cnn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+   		   } catch (SQLException e) { e.printStackTrace(); }
+           try {
+        	   String query = "SELECT * FROM SDUNN_SROCHA_USERS WHERE UserName = '" + username + "'";
+        	   System.out.println(query);
+               res = stmt.executeQuery(query);
+               meta = res.getMetaData();
+               String row;
+               int numColumns = meta.getColumnCount();
+               while(res.next()) {
+                   for (int i=1; i<=numColumns; i++) {
+                	   if (meta.getColumnLabel(i).equals("PASSWORD")) {
+                		   if (!res.getString(i).equals(password)) {
+                			   username = "";
+                			   JOptionPane.showMessageDialog(null, "Incorrect Username or Password!");
+                		   }
+                		   else {
+                			   try {
+                	               paintSocket = new Socket( HOST, PORT);
+                	               out = new ObjectOutputStream( paintSocket.getOutputStream());
+                	               in = new ObjectInputStream(paintSocket.getInputStream());
+                	               (new Thread (new BrushStrokeReciever(in, drawPad, this))).start();
+                	               Thread send = new BrushStrokeSender(out, new BrushStroke(0, 0, 0, 0, -1, 0, null, username));
+                	               send.start();
+                	               try { send.join(); } catch (InterruptedException f )  { }
+                	               setConnected(true);
+                	           } catch(IOException er) { er.printStackTrace(); }
+                			   shape.setSelectedIndex(0);
+                               connector.setBackground(Color.GREEN);
+                               connector.setText("Connected...");
+                		   }
+                	   }
+                   }
+               }
+           } catch (SQLException e1) { e1.printStackTrace(); }
        }
        
        private Color generateColor() {
@@ -274,18 +327,22 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
                return;
            }
            if (obj == connector) {
-               connect();
-               if (connected) {
-                   shape.setSelectedIndex(0);
-                   connector.setBackground(Color.GREEN);
-                   connector.setText("Connected...");
-               }
-               else {
-                   connector.setBackground(Color.WHITE);
-                   connector.setText("Connect again");
-               }
+        	   login.setVisible(true);
                return;
            }
+           if (obj == login.login) {
+        	   username = login.username.getText().trim();
+        	   password = String.valueOf(login.password.getPassword());
+        	   login.setVisible(false);
+        	   connect();
+        	   
+           }
+           if (obj == login.cancel) {
+        	   login.setVisible(false);
+        	   login.username.setText("");
+        	   login.password.setText("");
+           }
+           
            if (obj == shape) {
                String t = (String) shape.getSelectedItem();
                if (t.equals(brushShape[0])) { brushMode = BrushStroke.SQUARE; return; }
@@ -322,6 +379,8 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
        public void setConnected(boolean c)  { connected = c; }
        public ObjectOutputStream getOutput(){ return out; }
        public ObjectInputStream getInput()  { return in; }
+       public String getUser()              { return username; }
+       public void setUser(String user)     { username = user; }
 }
 
 
@@ -348,7 +407,7 @@ class PadDraw extends JComponent{
                 if (paint2.getConnected()) {
                     if (paint2.getBrushShape() != BrushStroke.LINE && paint2.getBrushShape() != BrushStroke.PEN) {
                         Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldX, oldY, paint2.getBrushShape(),
-                                paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current));
+                                paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser()));
                         send.start();
                         try { send.join(); } catch (InterruptedException f )  { }
                     }
@@ -367,7 +426,7 @@ class PadDraw extends JComponent{
                     newLineX = e.getX(); newLineY = e.getY();
                     if (paint2.getConnected()) {
                         Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldLineX, newLineX, oldLineY, newLineY, 
-                                paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current));
+                                paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser()));
                         send.start();
                         try { send.join(); } catch (InterruptedException f )  { }
                     }
@@ -400,13 +459,13 @@ class PadDraw extends JComponent{
                     if (paint2.getBrushShape() != BrushStroke.LINE) {
                         if (paint2.getBrushShape() == BrushStroke.PEN) {
                             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldX, currentX, oldY, currentY, 
-                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current));
+                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser()));
                             send.start();
                             try { send.join(); } catch (InterruptedException f )  { }
                         }
                         else {
                             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(currentX, currentY, 
-                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current));
+                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser()));
                             send.start();
                             try { send.join(); } catch (InterruptedException f )  { }
                         }
@@ -479,7 +538,7 @@ class PadDraw extends JComponent{
         repaint();
         if (paint2.getConnected()) {
             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                    background? paint2.getBgColor() : Color.WHITE));
+                    background? paint2.getBgColor() : Color.WHITE, paint2.getUser()));
             send.start();
             try { send.join(); } catch (InterruptedException f )  { }
         }
@@ -491,7 +550,9 @@ class PadDraw extends JComponent{
     
     public void setImage(File file) {
         try {
-            image = ImageIO.read(file);
+        	BufferedImage newImage = ImageIO.read(file);
+            //image = ImageIO.read(file);
+        	graphics2D.drawImage(newImage, 0, 0, width, height, null);
         } catch (IOException e) {}
     }
     

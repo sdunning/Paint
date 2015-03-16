@@ -28,12 +28,15 @@ class Agent implements Runnable {
     ObjectOutputStream	out = null;
     IndexedOutput	    idxOut = null;
     Monitor		        mtr = null;
+    Visitor             username = null;
     BrushStroke		    stroke = null; 
+    Message             message = null;
     int			        vID;
     
-    public Agent (Monitor m, Socket ck, int id ) {
+    public Agent (Monitor m, Socket ck, int id) {
 	mtr = m;
-	vID = id; 
+	vID = id;
+	username = null;
 	try { 
 	    in  = new ObjectInputStream  ( ck.getInputStream() );
 	    out = new ObjectOutputStream ( ck.getOutputStream() );
@@ -41,38 +44,47 @@ class Agent implements Runnable {
     }
 
     public void run() {
-	try {
-	    while ( true ) {
-	        stroke = (BrushStroke) in.readObject() ;
-	        System.out.printf("Server  : [ %s ]\n", stroke);
-	        if (stroke.getType() == -1) {
-	            idxOut = new IndexedOutput ( vID, out);
-	            mtr.add( idxOut  );
-
-	        }
-	        mtr.broadcast(stroke);
-	    }
-	} catch ( Exception e ) { mtr.remove ( idxOut ); return;  }
-
+    	try {
+    		while ( true ) {
+    			Object obj = in.readObject();
+    			if (obj.getClass() == BrushStroke.class) {
+    				stroke = (BrushStroke) obj;
+    				System.out.printf("Server  : [ %s ]", stroke);
+    				if (stroke.getType() == -1) {
+    					idxOut = new IndexedOutput ( vID, out);
+    					mtr.add( idxOut  );
+    				}
+    				mtr.broadcast(stroke, null);
+    			}
+    			else if (obj.getClass() == Message.class) {
+    				message = (Message) obj;
+    				System.out.printf("Server  : [Message:  %s ]", message);
+    				mtr.broadcast(null, message);
+    			}
+    		} 
+    	} catch ( Exception e ) { mtr.remove ( idxOut ); return;  }
     }
 }
 
 class Monitor { 
-    OutputSet		        outSet  = null;
-    public Monitor() {
+    
+	OutputSet outSet  = null;
+    
+	public Monitor() {
         outSet = new OutputSet();
-        }
-    synchronized public void	add( IndexedOutput out  ) { outSet.add(out); }
-
+    }
+    
+	synchronized public void add( IndexedOutput out  ) { outSet.add(out); }
     synchronized public void remove( IndexedOutput out ) { outSet.remove(out); }
 
-    synchronized public void broadcast( BrushStroke stroke ) {
+    synchronized public void broadcast( BrushStroke stroke, Message message ) {
       Iterator<IndexedOutput> itr = outSet.iterator();
       try {
           IndexedOutput idxOut = null;
           while ( itr.hasNext() ) {
               idxOut = itr.next();
-              idxOut.out.writeObject( stroke );
+              if (message == null) idxOut.out.writeObject( stroke );
+              if (stroke == null) idxOut.out.writeObject( message );
               idxOut.out.flush();
          }
       } catch (IOException e ) { e.printStackTrace(); }
