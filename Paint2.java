@@ -33,6 +33,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     //JColorChooser colorSelector = new JColorChooser();
     WindowedColorChooser colorChooser = new WindowedColorChooser("Pick a color...");
     Login login = new Login("Login");
+    Client chat = new Client();
     
     JPanel  panWest = new JPanel();
     JPanel  panNorth = new JPanel();
@@ -196,7 +197,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
         
         c.add(drawPad, BorderLayout.CENTER);
         c.add(panNorth, BorderLayout.NORTH);
-        //c.add(panWest, BorderLayout.WEST);
+        c.add(chat, BorderLayout.EAST);
         c.add(panSouth, BorderLayout.SOUTH);
        }
        
