@@ -18,6 +18,8 @@ public class BrushStroke implements Serializable{
     private Color color = null;
     private String user = "";
     
+    protected Message message = null;
+    
     private void colorSeperator() {
         if (color != null) {
             red = color.getRed();
@@ -27,16 +29,18 @@ public class BrushStroke implements Serializable{
         }
     }
     
-    public BrushStroke(int x, int y, int type, int size, Color color, String user) {
+    public BrushStroke(int x, int y, int type, int size, Color color, String user, Message msg) {
         oldX = x; oldY = y; brushType = type; brushSize = size; this.color = color; this.user = user;
+        message = msg;
         colorSeperator();
     }
-    public BrushStroke(int oldX, int newX, int oldY, int newY, int type, int size, Color color, String user) {
+    public BrushStroke(int oldX, int newX, int oldY, int newY, int type, int size, Color color, String user, Message msg) {
         this.oldX = oldX; this.newX = newX;
         this.oldY = oldY; this.newY = newY;
         brushType = type; brushSize = size;
         this.color = color; colorSeperator();
         this.user = user;
+        message = msg;
     }
     
     public void setX(int x)           { oldX = x; }
@@ -51,6 +55,7 @@ public class BrushStroke implements Serializable{
     public void setSize(int size)     { brushSize = size; }
     public void setColor(Color color) { this.color = color; colorSeperator(); }
     public void setUser(String user)  { this.user = user; }
+    public void setMessage(Message m) { message = m; }
     
     public int getX()           { return oldX; }
     public int getY()           { return oldY; }
@@ -65,10 +70,11 @@ public class BrushStroke implements Serializable{
     public int getGreen()       { return green; }
     public int getBlue()        { return blue; }
     public int getAlpha()       { return alpha; }
-    public String getUser()     { return user; }    
+    public String getUser()     { return user; }
+    public Message getMessage() { return message; }
     @Override
     public String toString() {
-        return String.format("user=%8s | oldX=%4d | oldY=%4d | newX=%4d | newY=%4d \n | brushType=%4d | brushSize=%4d | red=%4d | green=%4d | blue=%4d | alpha=%4d\n\n",
+        return String.format("user=%8s | oldX=%4d | oldY=%4d | newX=%4d | newY=%4d | brushType=%4d | brushSize=%4d | red=%4d | green=%4d | blue=%4d | alpha=%4d\n",
                               user, oldX, oldY, newX, newY, brushType, brushSize, red, green, blue, alpha);
     }
 }

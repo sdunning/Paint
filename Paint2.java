@@ -33,7 +33,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     //JColorChooser colorSelector = new JColorChooser();
     WindowedColorChooser colorChooser = new WindowedColorChooser("Pick a color...");
     Login login = new Login("Login");
-    Client chat = new Client();
+    Chat chat = new Chat(this);
     
     JPanel  panWest = new JPanel();
     JPanel  panNorth = new JPanel();
@@ -69,7 +69,8 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     private int brushSize = BRUSH_SIZE_MIN;
     private Color bgColor = Color.WHITE;
     private Color current = Color.BLACK;
-    private Color bgGUI = new Color(180, 180, 180);
+    private Color bgGUI = new Color(198, 255, 125);
+    private Color buttonColor = new Color(195, 252, 219);
     private File loadedImage = null;
     private String username = "";
     private String password = "";
@@ -87,19 +88,20 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     ObjectInputStream          in  = null;
     
     private final int PORT = 8704;
+    //private final String HOST = "localhost";
     private final String HOST = "sleipnir.cs.csubak.edu";
     private boolean connected = false;
     
     public static void main(String[] args){
-        try {
+/*        try {
             // Set System L&F
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (UnsupportedLookAndFeelException e) {}
           catch (ClassNotFoundException e) {}
           catch (InstantiationException e) {}
           catch (IllegalAccessException e) {}
-        
-        JFrame frame = new JFrame("Paint It");
+*/        
+        JFrame frame = new JFrame("Community Canvas");
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setSize(635, 600);
         frame.setBackground(new Color(180, 180, 180));
@@ -163,9 +165,29 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
         subWest.setBackground(bgGUI);
         
         subEast.setLayout(new BorderLayout());
-        subEast.setBackground(bgGUI);
+        subEast.setBackground(Color.white);
         subSubEast.setLayout( new GridLayout(2, 7) );
-        subSubEast.setBackground(bgGUI);
+        subSubEast.setBackground(Color.white);
+        
+        colorBox.setBackground(current);
+        backGround.setBackground(buttonColor);
+        open.setBackground(buttonColor);
+        eraseBox.setBackground(buttonColor);
+        shape.setBackground(buttonColor);
+        clear.setBackground(buttonColor);
+        chooseColor.setBackground(buttonColor);
+        random.setBackground(buttonColor);
+        save.setBackground(buttonColor);
+        
+        /*backGround.setForeground(Color.white);
+        open.setForeground(Color.white);
+        eraseBox.setForeground(Color.white);
+        shape.setForeground(Color.white);
+        clear.setForeground(Color.white);
+        chooseColor.setForeground(Color.white);
+        random.setForeground(Color.white);
+        save.setForeground(Color.white);*/
+        
         subSubEast.add(colorBox);
         subSubEast.add(backGround);
         subSubEast.add(open);
@@ -180,12 +202,15 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
             if (i != 2) info[i].setEditable(false);
             info[i].setBackground(Color.WHITE);
             info[i].setForeground(Color.BLACK);
-            info[i].setFont(new Font("Arial", Font.PLAIN, 10));
+            info[i].setFont(new Font("Arial", Font.PLAIN, 12));
             subSubEast.add(info[i]);
         }
         info[2].setToolTipText("Type in and display brush size. " +
                                "Type value and press ENTER.");
         subEast.add(subSubEast, BorderLayout.WEST);
+        
+        sldBrushSize.setBackground(buttonColor);
+        connector.setBackground(buttonColor);
         
         panSouth.setLayout(new BorderLayout());
         panSouth.add(sldBrushSize, BorderLayout.EAST);
@@ -245,8 +270,10 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
                 	               paintSocket = new Socket( HOST, PORT);
                 	               out = new ObjectOutputStream( paintSocket.getOutputStream());
                 	               in = new ObjectInputStream(paintSocket.getInputStream());
-                	               (new Thread (new BrushStrokeReciever(in, drawPad, this))).start();
-                	               Thread send = new BrushStrokeSender(out, new BrushStroke(0, 0, 0, 0, -1, 0, null, username));
+                	               (new Thread (new BrushStrokeReciever(in, drawPad, this, chat, chat.ta))).start();
+                	               Message msg = new Message();
+                	               msg.set(username, "Logged in...", null);
+                	               Thread send = new BrushStrokeSender(out, new BrushStroke(0, 0, 0, 0, -1, 0, null, username, msg));
                 	               send.start();
                 	               try { send.join(); } catch (InterruptedException f )  { }
                 	               setConnected(true);
@@ -334,9 +361,8 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
            if (obj == login.login) {
         	   username = login.username.getText().trim();
         	   password = String.valueOf(login.password.getPassword());
-        	   login.setVisible(false);
+        	   login.setVisible(false);  
         	   connect();
-        	   
            }
            if (obj == login.cancel) {
         	   login.setVisible(false);
@@ -408,7 +434,7 @@ class PadDraw extends JComponent{
                 if (paint2.getConnected()) {
                     if (paint2.getBrushShape() != BrushStroke.LINE && paint2.getBrushShape() != BrushStroke.PEN) {
                         Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldX, oldY, paint2.getBrushShape(),
-                                paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser()));
+                                paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null));
                         send.start();
                         try { send.join(); } catch (InterruptedException f )  { }
                     }
@@ -427,7 +453,7 @@ class PadDraw extends JComponent{
                     newLineX = e.getX(); newLineY = e.getY();
                     if (paint2.getConnected()) {
                         Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldLineX, newLineX, oldLineY, newLineY, 
-                                paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser()));
+                                paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null));
                         send.start();
                         try { send.join(); } catch (InterruptedException f )  { }
                     }
@@ -460,13 +486,13 @@ class PadDraw extends JComponent{
                     if (paint2.getBrushShape() != BrushStroke.LINE) {
                         if (paint2.getBrushShape() == BrushStroke.PEN) {
                             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldX, currentX, oldY, currentY, 
-                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser()));
+                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null));
                             send.start();
                             try { send.join(); } catch (InterruptedException f )  { }
                         }
                         else {
                             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(currentX, currentY, 
-                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser()));
+                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null));
                             send.start();
                             try { send.join(); } catch (InterruptedException f )  { }
                         }
@@ -477,7 +503,8 @@ class PadDraw extends JComponent{
                 oldY = currentY;
             }
             public void mouseMoved(MouseEvent e) {
-                currentX = e.getX(); currentY = e.getY();
+                currentX = e.getX() > 1000 ? 1000 : e.getX();
+                currentY = e.getY() > 700 ? 700 : e.getY();
                 String information[] = { "X : " + currentX,
                                          "Y : " + currentY,};
                 for (int i = 0; i < information.length; i++) {
@@ -539,7 +566,7 @@ class PadDraw extends JComponent{
         repaint();
         if (paint2.getConnected()) {
             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                    background? paint2.getBgColor() : Color.WHITE, paint2.getUser()));
+                    background? paint2.getBgColor() : Color.WHITE, paint2.getUser(), null));
             send.start();
             try { send.join(); } catch (InterruptedException f )  { }
         }

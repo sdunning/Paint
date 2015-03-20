@@ -13,7 +13,8 @@ public class Server {
     static int			vID = 0;
 
     public static void main( String args[] ) {
-        try { 
+        try {
+        	System.out.println("Server started...");
             ssk = new ServerSocket( 8704);
 	    	while ( true ) {
 	    	    csk = ssk.accept();
@@ -28,64 +29,74 @@ class Agent implements Runnable {
     ObjectOutputStream	out = null;
     IndexedOutput	    idxOut = null;
     Monitor		        mtr = null;
-    Visitor             username = null;
+    Visitor             user = null;
     BrushStroke		    stroke = null; 
     Message             message = null;
     int			        vID;
     
     public Agent (Monitor m, Socket ck, int id) {
-	mtr = m;
-	vID = id;
-	username = null;
-	try { 
-	    in  = new ObjectInputStream  ( ck.getInputStream() );
-	    out = new ObjectOutputStream ( ck.getOutputStream() );
-	} catch ( IOException e ) { e.printStackTrace(); }
+    	mtr = m; vID = id; user = null;
+    	try { 
+    		in  = new ObjectInputStream  ( ck.getInputStream() );
+    		System.out.println("InputStream created...");
+    		out = new ObjectOutputStream ( ck.getOutputStream() );
+    		System.out.println("OutputStream created...");
+    	} catch ( IOException e ) { e.printStackTrace(); }
     }
 
     public void run() {
     	try {
     		while ( true ) {
-    			Object obj = in.readObject();
-    			if (obj.getClass() == BrushStroke.class) {
-    				stroke = (BrushStroke) obj;
-    				System.out.printf("Server  : [ %s ]", stroke);
-    				if (stroke.getType() == -1) {
-    					idxOut = new IndexedOutput ( vID, out);
-    					mtr.add( idxOut  );
-    				}
-    				mtr.broadcast(stroke, null);
+    			stroke = (BrushStroke) in.readObject();
+    			System.out.printf("Server  : [ %s ]", stroke);
+    			//if (stroke.getType() == -2) System.out.println(stroke.message);
+    			if (stroke.getType() == -1) {
+    				System.out.println(stroke.message.message);
+    				user = new Visitor(vID, stroke.getUser());
+    				idxOut = new IndexedOutput ( vID, out);
+    				mtr.add(user); mtr.add( idxOut );
     			}
-    			else if (obj.getClass() == Message.class) {
-    				message = (Message) obj;
-    				System.out.printf("Server  : [Message:  %s ]", message);
-    				mtr.broadcast(null, message);
-    			}
+    			//stroke.message.set(stroke.message.user, stroke.message.message, stroke.message.visitorList.toString());
+    			if (stroke.message.visitorList != null) System.out.println(stroke.message.visitorList);
+    			else System.out.println("Visitor list is null...........");
+    			stroke.message.message = user.name + ": " + stroke.message.message;
+    			mtr.broadcast(stroke);
     		} 
-    	} catch ( Exception e ) { mtr.remove ( idxOut ); return;  }
+    	} catch ( Exception e ) {
+    		e.printStackTrace();
+    		mtr.remove ( user, idxOut );
+    		System.out.printf("%s has left the session.", user.toShortString());
+    		return;
+    	}
     }
 }
 
 class Monitor { 
-    
+	VisitorSet visitorSet = null;
 	OutputSet outSet  = null;
     
 	public Monitor() {
+		visitorSet = new VisitorSet();
         outSet = new OutputSet();
     }
     
 	synchronized public void add( IndexedOutput out  ) { outSet.add(out); }
-    synchronized public void remove( IndexedOutput out ) { outSet.remove(out); }
+	synchronized public void add( Visitor v) { visitorSet.add(v); }
+    synchronized public void remove( Visitor v, IndexedOutput out ) { 
+    	outSet.remove(out); visitorSet.remove(v);
+    }
 
-    synchronized public void broadcast( BrushStroke stroke, Message message ) {
+    synchronized public void broadcast( BrushStroke stroke ) {
       Iterator<IndexedOutput> itr = outSet.iterator();
       try {
           IndexedOutput idxOut = null;
           while ( itr.hasNext() ) {
               idxOut = itr.next();
-              if (message == null) idxOut.out.writeObject( stroke );
-              if (stroke == null) idxOut.out.writeObject( message );
+              System.out.println(stroke.message.visitorList);
+              stroke.message.visitorList = visitorSet.toString();
+              idxOut.out.writeObject( stroke );
               idxOut.out.flush();
+              System.out.println(visitorSet);
          }
       } catch (IOException e ) { e.printStackTrace(); }
    }

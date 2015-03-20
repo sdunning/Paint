@@ -15,6 +15,7 @@ public class Login extends JFrame{
 	protected JButton cancel = new JButton("Cancel");
 	
 	public Login(String title) {
+		setLocationRelativeTo(null);
 		setTitle(title);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLayout( new GridLayout(0, 2) );
@@ -23,5 +24,8 @@ public class Login extends JFrame{
 		add(login); add(cancel);
 		setSize(250,120);
 		setVisible(false);
+		
+		username.setText("sdunning");
+		password.setText("testpassword");
 	}
 }
