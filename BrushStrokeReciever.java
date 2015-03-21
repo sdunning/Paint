@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.io.*;
 
 import javax.swing.JTextArea;
@@ -13,9 +14,10 @@ public class BrushStrokeReciever extends Thread {
     private Boolean exit = false;
     private Object obj = null;
     private JTextArea ta = null;
+    private CustomChatBox box = null;
     
-    public BrushStrokeReciever(ObjectInputStream in, PadDraw pad, Paint2 paint, Chat chat, JTextArea ta) {
-        this.in = in; drawPad = pad; this.paint = paint; this.chat = chat; this.ta = ta;
+    public BrushStrokeReciever(ObjectInputStream in, PadDraw pad, Paint2 paint, Chat chat, CustomChatBox box) {
+        this.in = in; drawPad = pad; this.paint = paint; this.chat = chat; this.box = box; //this.ta = ta;
     }
     
     public void run() {
@@ -26,7 +28,8 @@ public class BrushStrokeReciever extends Thread {
             	System.out.printf("RECEIVER: [ %s ]\n", stroke);
             	if ((stroke != null) && (stroke.message != null)) {
             		System.out.printf("MESSAGE: [ %s ]\n",stroke.message.message);
-            		ta.append( stroke.message.message + "\n" );
+            		//ta.append( stroke.message.message + "\n" );
+            		box.append(stroke.message.message, Color.GREEN);
             		chat.visitorSet.clear();
             		if (stroke.message.visitorList != null) { 
             			chat.visitorSet.add(stroke.message.visitorList);

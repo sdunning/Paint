@@ -270,7 +270,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
                 	               paintSocket = new Socket( HOST, PORT);
                 	               out = new ObjectOutputStream( paintSocket.getOutputStream());
                 	               in = new ObjectInputStream(paintSocket.getInputStream());
-                	               (new Thread (new BrushStrokeReciever(in, drawPad, this, chat, chat.ta))).start();
+                	               (new Thread (new BrushStrokeReciever(in, drawPad, this, chat, chat.box))).start();
                 	               Message msg = new Message();
                 	               msg.set(username, "Logged in...", null);
                 	               Thread send = new BrushStrokeSender(out, new BrushStroke(0, 0, 0, 0, -1, 0, null, username, msg));

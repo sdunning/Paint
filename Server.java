@@ -49,17 +49,13 @@ class Agent implements Runnable {
     		while ( true ) {
     			stroke = (BrushStroke) in.readObject();
     			System.out.printf("Server  : [ %s ]", stroke);
-    			//if (stroke.getType() == -2) System.out.println(stroke.message);
     			if (stroke.getType() == -1) {
     				System.out.println(stroke.message.message);
     				user = new Visitor(vID, stroke.getUser());
     				idxOut = new IndexedOutput ( vID, out);
     				mtr.add(user); mtr.add( idxOut );
     			}
-    			//stroke.message.set(stroke.message.user, stroke.message.message, stroke.message.visitorList.toString());
-    			if (stroke.message.visitorList != null) System.out.println(stroke.message.visitorList);
-    			else System.out.println("Visitor list is null...........");
-    			stroke.message.message = user.name + ": " + stroke.message.message;
+    			if(stroke.message != null) stroke.message.message = user.name + ": " + stroke.message.message;
     			mtr.broadcast(stroke);
     		} 
     	} catch ( Exception e ) {
@@ -92,35 +88,14 @@ class Monitor {
           IndexedOutput idxOut = null;
           while ( itr.hasNext() ) {
               idxOut = itr.next();
-              System.out.println(stroke.message.visitorList);
-              stroke.message.visitorList = visitorSet.toString();
+              if (stroke.message != null){
+            	  System.out.println(stroke.message.visitorList);
+            	  stroke.message.visitorList = visitorSet.toString();
+              }
               idxOut.out.writeObject( stroke );
               idxOut.out.flush();
               System.out.println(visitorSet);
          }
       } catch (IOException e ) { e.printStackTrace(); }
    }
-
-   /*synchronized public void privBroadcast(Message msg) {
-       System.out.println("Enterd Private Chat");
-       privList.add(msg.visitorList);
-       System.out.printf("\n\n========= Priv-Message will be broadcasted to the following\n");
-       privList.print();
-       System.out.printf("\n========= end of listing of visitors\n");
-       Iterator<IndexedOutput> itr = outSet.iterator();
-       try {
-           IndexedOutput idxOut = null;
-           while (itr.hasNext()) {
-               idxOut = itr.next();
-               for (int i = 0; i < privList.size(); i++) {
-                   if (idxOut.ID == privList.get(i).ID) {
-                       idxOut.out.writeObject(msg);;
-                       idxOut.out.flush();
-                       break;
-                   }
-               }
-           }
-           privList.clear();
-       } catch (IOException e) { e.printStackTrace(); }
-   }*/
 }
