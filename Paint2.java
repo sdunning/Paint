@@ -88,8 +88,8 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     ObjectInputStream          in  = null;
     
     private final int PORT = 8704;
-    //private final String HOST = "localhost";
-    private final String HOST = "sleipnir.cs.csubak.edu";
+    private final String HOST = "localhost";
+    //private final String HOST = "sleipnir.cs.csubak.edu";
     private boolean connected = false;
     
     public static void main(String[] args){

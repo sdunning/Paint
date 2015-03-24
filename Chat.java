@@ -8,15 +8,14 @@ import java.io.* ;
 import java.net.* ;
 import java.util.* ;
 	
-public class Chat extends JPanel implements ActionListener, MouseListener  {
+public class Chat extends JPanel implements ActionListener, MouseListener, KeyListener  {
 
 	CustomChatBox box = new CustomChatBox();
     int		port = 8705;
     int		frame_height = 350;
     int		font_size = 9;
-    JLabel	lb = new JLabel("Message: ");
-    public JTextField txt = new JTextField(20);
-    JTextArea	ta = new JTextArea();
+    public JTextArea txt = new JTextArea();
+    JButton send = new JButton();
     JPanel	pl = new JPanel();
     JPanel	plSouth = new JPanel();
     JPanel	plEast = new JPanel();
@@ -38,7 +37,9 @@ public class Chat extends JPanel implements ActionListener, MouseListener  {
     }
    
     public void init() {
-    	setLayout( new BorderLayout() );
+    	this.setPreferredSize(new Dimension(400, 300));
+    	this.setMinimumSize(new Dimension(300,400));
+    	this.setLayout( new BorderLayout() );
     	plEast.setBorder( new TitledBorder("Users"));
     	plEast.setPreferredSize(new Dimension(100, frame_height));
     	plEast.setFont(new Font("verdana", Font.PLAIN, font_size));	
@@ -48,25 +49,24 @@ public class Chat extends JPanel implements ActionListener, MouseListener  {
     	plSouth.setBackground(new Color(198, 255, 125));
     	pl.setBackground(new Color(198, 255, 125));
     	setBackground(new Color(198, 255, 125));
-    	ta.setBackground(Color.white);
-    	ta.setForeground(Color.black); 
-    	ta.setEditable(false);
-    	ta.setSize(300, 200);
     	pl.setLayout(new FlowLayout());
-    	txt.setFont(new Font("verdana", Font.PLAIN, font_size));
-    	pl.add(lb);
+    	txt.setFont(new Font("verdana", Font.PLAIN, 12));
+    	txt.setLineWrap(true);
+    	txt.setWrapStyleWord(true);
+    	send.setIcon(new ImageIcon("client_images/mail_send.png"));
+    	send.addActionListener(this);
     	pl.add(txt);
-    	txt.addActionListener(this);
+    	pl.add(send);
+    	txt.addKeyListener(this);
     	txt.setEnabled(true);
-    	txt.setColumns(20);
+    	txt.setPreferredSize(new Dimension(300, 100));
+    	txt.setBorder(BorderFactory.createLineBorder(Color.BLACK));
     	txt.setToolTipText("Enter message to send and press ENTER");
     	plSouth.add(pl, BorderLayout.CENTER);
     	
-    	ta.setFont(new Font("verdana", Font.PLAIN, font_size) );
-    	//add(new JScrollPane(ta), BorderLayout.CENTER);
     	add(new JScrollPane(box), BorderLayout.CENTER);
     	add(plSouth, BorderLayout.SOUTH);
-    	add(plEast, BorderLayout.WEST);
+    	add(plEast, BorderLayout.EAST);
     	
     	setSize( frame_height + 50, frame_height);
     }
@@ -167,12 +167,12 @@ public class Chat extends JPanel implements ActionListener, MouseListener  {
    }
  
    static String str = null;
-
+   @Override
    public void actionPerformed(ActionEvent e ) {
 	Object obj = e.getSource();
-
-	if ( obj == txt ) {
-	        str = new String(txt.getText()).trim();
+	
+	if (obj == send) {
+		str = new String(txt.getText()).trim();
 		if ( str.equals("") ) return;
 		message.set( paint.getUser(), str, null); 
 
@@ -183,7 +183,31 @@ public class Chat extends JPanel implements ActionListener, MouseListener  {
 		txt.setText("");
 		txt.requestFocus();
 	}
+
    }
+   
+   @Override
+   public void keyTyped(KeyEvent e) {}
+   @Override
+   public void keyReleased(KeyEvent e) {}
+   @Override
+   public void keyPressed(KeyEvent e) {
+	   if (e.getSource() == txt) {
+		   if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				str = new String(txt.getText()).trim();
+				if ( str.equals("") ) return;
+				message.set( paint.getUser(), str, null); 
+
+				Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message)) );
+				thr.start() ;
+				try { thr.join(); } catch (InterruptedException f )  { }
+
+				txt.setText("");
+				txt.requestFocus();
+		   }
+	   }
+   }
+   
 }
 
 

@@ -55,7 +55,7 @@ class Agent implements Runnable {
     				idxOut = new IndexedOutput ( vID, out);
     				mtr.add(user); mtr.add( idxOut );
     			}
-    			if(stroke.message != null) stroke.message.message = user.name + ": " + stroke.message.message;
+    			if(stroke.message != null) stroke.message.message = user.name + " : " + stroke.message.message;
     			mtr.broadcast(stroke);
     		} 
     	} catch ( Exception e ) {

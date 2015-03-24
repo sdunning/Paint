@@ -29,7 +29,7 @@ public class BrushStrokeReciever extends Thread {
             	if ((stroke != null) && (stroke.message != null)) {
             		System.out.printf("MESSAGE: [ %s ]\n",stroke.message.message);
             		//ta.append( stroke.message.message + "\n" );
-            		box.append(stroke.message.message, Color.GREEN);
+            		box.appendString(stroke.message.message, ":", chat.visitorSet);
             		chat.visitorSet.clear();
             		if (stroke.message.visitorList != null) { 
             			chat.visitorSet.add(stroke.message.visitorList);
