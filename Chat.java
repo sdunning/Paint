@@ -176,7 +176,7 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
 		if ( str.equals("") ) return;
 		message.set( paint.getUser(), str, null); 
 
-		Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message)) );
+		Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message), paint.getGroup()) );
 		thr.start() ;
 		try { thr.join(); } catch (InterruptedException f )  { }
 
@@ -198,7 +198,7 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
 				if ( str.equals("") ) return;
 				message.set( paint.getUser(), str, null); 
 
-				Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message)) );
+				Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message), paint.getGroup()) );
 				thr.start() ;
 				try { thr.join(); } catch (InterruptedException f )  { }
 

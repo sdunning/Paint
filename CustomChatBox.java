@@ -37,7 +37,7 @@ public class CustomChatBox extends JTextPane {
 		setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		setContentType("text/html");
-		buffer.append("<hmtl>");
+		buffer.append("<hmtl><h3>Welcome to Community Canvas</h3>");
 		//doc = (HTMLDocument) this.getDocument();
 		//kit = (HTMLEditorKit) this.getEditorKit();
 	}

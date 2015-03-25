@@ -17,6 +17,7 @@ public class BrushStroke implements Serializable{
     private int red = 0, green = 0, blue = 0, alpha = 0;
     private Color color = null;
     private String user = "";
+    private int group = -1;
     
     protected Message message = null;
     
@@ -29,18 +30,19 @@ public class BrushStroke implements Serializable{
         }
     }
     
-    public BrushStroke(int x, int y, int type, int size, Color color, String user, Message msg) {
-        oldX = x; oldY = y; brushType = type; brushSize = size; this.color = color; this.user = user;
+    public BrushStroke(int x, int y, int type, int size, Color color, String user, Message msg, int group) {
+        oldX = x; oldY = y; brushType = type; brushSize = size; this.color = color; this.user = user; this.group = group;
         message = msg;
         colorSeperator();
     }
-    public BrushStroke(int oldX, int newX, int oldY, int newY, int type, int size, Color color, String user, Message msg) {
+    public BrushStroke(int oldX, int newX, int oldY, int newY, int type, int size, Color color, String user, Message msg, int group) {
         this.oldX = oldX; this.newX = newX;
         this.oldY = oldY; this.newY = newY;
         brushType = type; brushSize = size;
         this.color = color; colorSeperator();
         this.user = user;
         message = msg;
+        this.group = group;
     }
     
     public void setX(int x)           { oldX = x; }
@@ -56,6 +58,7 @@ public class BrushStroke implements Serializable{
     public void setColor(Color color) { this.color = color; colorSeperator(); }
     public void setUser(String user)  { this.user = user; }
     public void setMessage(Message m) { message = m; }
+    public void setGroup(int group)   { this.group = group; }
     
     public int getX()           { return oldX; }
     public int getY()           { return oldY; }
@@ -72,9 +75,10 @@ public class BrushStroke implements Serializable{
     public int getAlpha()       { return alpha; }
     public String getUser()     { return user; }
     public Message getMessage() { return message; }
+    public int getGroup()       { return group; }
     @Override
     public String toString() {
-        return String.format("user=%8s | oldX=%4d | oldY=%4d | newX=%4d | newY=%4d | brushType=%4d | brushSize=%4d | red=%4d | green=%4d | blue=%4d | alpha=%4d\n",
-                              user, oldX, oldY, newX, newY, brushType, brushSize, red, green, blue, alpha);
+        return String.format("user=%8s | group=%4d | oldX=%4d | oldY=%4d | newX=%4d | newY=%4d | brushType=%4d | brushSize=%4d | red=%4d | green=%4d | blue=%4d | alpha=%4d\n",
+                              user, group, oldX, oldY, newX, newY, brushType, brushSize, red, green, blue, alpha);
     }
 }
