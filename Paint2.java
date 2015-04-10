@@ -276,7 +276,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
                 	               (new Thread (new BrushStrokeReciever(in, drawPad, this, chat, chat.box))).start();
                 	               Message msg = new Message();
                 	               msg.set(username, "Logged in...", null);
-                	               Thread send = new BrushStrokeSender(out, new BrushStroke(0, 0, 0, 0, -1, 0, null, username, msg, group));
+                	               Thread send = new BrushStrokeSender(out, new BrushStroke(0, 0, 0, 0, -1, 0, null, username, msg, group, null));
                 	               send.start();
                 	               try { send.join(); } catch (InterruptedException f )  { }
                 	               setConnected(true);

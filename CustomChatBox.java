@@ -59,23 +59,23 @@ public class CustomChatBox extends JTextPane {
 			if (users.get(i).name.equals(name)) {
 				String whole = "";
 				switch(i) {
-				case 0: whole = "<font color='#990000'>" + name + "</font>" +
+				case 0: whole = "<font color='#990000'><b>" + name + "</b></font>" +
 				                "<font color='#CD0000'>"+ message + "</font>";
 						break;
 				
-				case 1: whole = "<font color='#000098'>" + name + "</font>" +
+				case 1: whole = "<font color='#000098'><b>" + name + "</b></font>" +
 		                        "<font color='#0000CD'>"+ message + "</font>";
 				        break;
 				
-				case 2: whole = "<font color='#009800'>" + name + "</font>" +
+				case 2: whole = "<font color='#009800'><b>" + name + "</b></font>" +
 		                        "<font color='#00CD00'>"+ message + "</font>";
 				        break;
 				
-				case 3: whole = "<font color='#980098'>" + name + "</font>" +
+				case 3: whole = "<font color='#980098'><b>" + name + "</b></font>" +
 		                        "<font color='#CD00CD'>"+ message + "</font>";
 				        break;
 				
-				case 4: whole = "<font color='#995C00'>" + name + "</font>" +
+				case 4: whole = "<font color='#995C00'><b>" + name + "</b></font>" +
 		                        "<font color='#CC7A00'>"+ message + "</font>";
 				        break;
 				

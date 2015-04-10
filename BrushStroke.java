@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Image;
 import java.io.Serializable;
 
 public class BrushStroke implements Serializable{
@@ -18,6 +19,7 @@ public class BrushStroke implements Serializable{
     private Color color = null;
     private String user = "";
     private int group = -1;
+    private SerializableBufferedImage bgImage = null;
     
     protected Message message = null;
     
@@ -30,17 +32,19 @@ public class BrushStroke implements Serializable{
         }
     }
     
-    public BrushStroke(int x, int y, int type, int size, Color color, String user, Message msg, int group) {
+    public BrushStroke(int x, int y, int type, int size, Color color, String user, Message msg, int group, SerializableBufferedImage image) {
         oldX = x; oldY = y; brushType = type; brushSize = size; this.color = color; this.user = user; this.group = group;
+        bgImage = image;
         message = msg;
         colorSeperator();
     }
-    public BrushStroke(int oldX, int newX, int oldY, int newY, int type, int size, Color color, String user, Message msg, int group) {
+    public BrushStroke(int oldX, int newX, int oldY, int newY, int type, int size, Color color, String user, Message msg, int group, SerializableBufferedImage image) {
         this.oldX = oldX; this.newX = newX;
         this.oldY = oldY; this.newY = newY;
         brushType = type; brushSize = size;
         this.color = color; colorSeperator();
         this.user = user;
+        bgImage = image;
         message = msg;
         this.group = group;
     }
@@ -59,6 +63,7 @@ public class BrushStroke implements Serializable{
     public void setUser(String user)  { this.user = user; }
     public void setMessage(Message m) { message = m; }
     public void setGroup(int group)   { this.group = group; }
+    public void setImage(SerializableBufferedImage image) { bgImage = image; }
     
     public int getX()           { return oldX; }
     public int getY()           { return oldY; }
@@ -76,6 +81,8 @@ public class BrushStroke implements Serializable{
     public String getUser()     { return user; }
     public Message getMessage() { return message; }
     public int getGroup()       { return group; }
+    public SerializableBufferedImage getImage()     { return bgImage; }
+    
     @Override
     public String toString() {
         return String.format("user=%8s | group=%4d | oldX=%4d | oldY=%4d | newX=%4d | newY=%4d | brushType=%4d | brushSize=%4d | red=%4d | green=%4d | blue=%4d | alpha=%4d\n",

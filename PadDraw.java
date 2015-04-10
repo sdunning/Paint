@@ -15,13 +15,14 @@ import javax.swing.JComponent;
 
 
 public class PadDraw extends JComponent{
-    BufferedImage image;
+    BufferedImage image, openedImage;
     Paint2 paint2;
     private int height = 700, width = 1000;
     Graphics2D graphics2D;
     private int currentX, currentY, oldX, oldY,
                 oldLineX, oldLineY, newLineX, newLineY;
     private Color current = Color.BLACK;
+    private Boolean bgImage = false;
 
     public PadDraw(Paint2 p){
         paint2 = p;
@@ -33,7 +34,7 @@ public class PadDraw extends JComponent{
                 if (paint2.getConnected()) {
                     if (paint2.getBrushShape() != BrushStroke.LINE && paint2.getBrushShape() != BrushStroke.PEN) {
                         Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldX, oldY, paint2.getBrushShape(),
-                                paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup()));
+                                paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null));
                         send.start();
                         try { send.join(); } catch (InterruptedException f )  { }
                     }
@@ -52,7 +53,7 @@ public class PadDraw extends JComponent{
                     newLineX = e.getX(); newLineY = e.getY();
                     if (paint2.getConnected()) {
                         Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldLineX, newLineX, oldLineY, newLineY, 
-                                paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup()));
+                                paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null));
                         send.start();
                         try { send.join(); } catch (InterruptedException f )  { }
                     }
@@ -85,13 +86,13 @@ public class PadDraw extends JComponent{
                     if (paint2.getBrushShape() != BrushStroke.LINE) {
                         if (paint2.getBrushShape() == BrushStroke.PEN) {
                             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldX, currentX, oldY, currentY, 
-                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup()));
+                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null));
                             send.start();
                             try { send.join(); } catch (InterruptedException f )  { }
                         }
                         else {
                             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(currentX, currentY, 
-                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup()));
+                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null));
                             send.start();
                             try { send.join(); } catch (InterruptedException f )  { }
                         }
@@ -129,7 +130,12 @@ public class PadDraw extends JComponent{
                 graphics2D.setStroke(new BasicStroke(1));
             }
             if (stroke.getType() == BrushStroke.BACKGROUND) {
-                paint2.setBgColor(stroke.getColor());
+            	if (stroke.getImage() == null) paint2.setBgColor(stroke.getColor());
+            	else {
+            		openedImage = stroke.getImage().get();
+            		bgImage = true;
+            		clear(true);
+            	}
                 graphics2D.setPaint(paint2.getBgColor());
                 graphics2D.fillRect(0, 0, width, height);
             }
@@ -159,16 +165,50 @@ public class PadDraw extends JComponent{
 
 
     public void clear(boolean background){
-        graphics2D.setPaint(background? paint2.getBgColor() : Color.white);
-        graphics2D.fillRect(0, 0, width, height);
-        graphics2D.setPaint(current);
+        if (background) {
+        	if (bgImage) {
+        		graphics2D.drawImage(openedImage, 0, 0, width, height, null);
+        		if (paint2.getConnected()) {
+        			SerializableBufferedImage sImage = new SerializableBufferedImage(openedImage);
+                    Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
+                            Color.WHITE, paint2.getUser(), null, paint2.getGroup(), sImage));
+                    send.start();
+                    try { send.join(); } catch (InterruptedException f )  { }
+                }
+        	}
+        	else {
+        		bgImage = false;
+        		graphics2D.setPaint(paint2.getBgColor());
+        		graphics2D.fillRect(0, 0, width, height);
+        		graphics2D.setPaint(current);
+        		if (paint2.getConnected()) {
+                    Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
+                            paint2.getBgColor(), paint2.getUser(), null, paint2.getGroup(), null));
+                    send.start();
+                    try { send.join(); } catch (InterruptedException f )  { }
+                }
+        	}
+        }
+        else {
+        	bgImage = false;
+    		graphics2D.setPaint(Color.WHITE);
+    		graphics2D.fillRect(0, 0, width, height);
+    		graphics2D.setPaint(current);
+    		if (paint2.getConnected()) {
+                Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
+                        Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null));
+                send.start();
+                try { send.join(); } catch (InterruptedException f )  { }
+            }
+    		//repaint();
+        }
         repaint();
-        if (paint2.getConnected()) {
-            Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                    background? paint2.getBgColor() : Color.WHITE, paint2.getUser(), null, paint2.getGroup()));
+        /*if (paint2.getConnected()) {
+            Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, bgImage? BrushStroke.BGIMAGE : BrushStroke.BACKGROUND, 0, 
+                    background? paint2.getBgColor() : Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null));
             send.start();
             try { send.join(); } catch (InterruptedException f )  { }
-        }
+        }*/
     }
     //this is the clear
     //it sets the colors as white
@@ -177,10 +217,20 @@ public class PadDraw extends JComponent{
     
     public void setImage(File file) {
         try {
-        	BufferedImage newImage = ImageIO.read(file);
+        	openedImage = ImageIO.read(file);
             //image = ImageIO.read(file);
-        	graphics2D.drawImage(newImage, 0, 0, width, height, null);
+        	//graphics2D.drawImage(openedImage, 0, 0, width, height, null);
+        	bgImage = true;
+        	clear(true);
         } catch (IOException e) {}
+        
+        if (paint2.getConnected()) {
+        	SerializableBufferedImage sImage = new SerializableBufferedImage(openedImage);
+            Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
+                    Color.WHITE, paint2.getUser(), null, paint2.getGroup(), sImage));
+            send.start();
+            try { send.join(); } catch (InterruptedException f )  { }
+        }
     }
     
     public void setColor(Color c) {

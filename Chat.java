@@ -40,7 +40,7 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
     	this.setPreferredSize(new Dimension(400, 300));
     	this.setMinimumSize(new Dimension(300,400));
     	this.setLayout( new BorderLayout() );
-    	plEast.setBorder( new TitledBorder("Users"));
+    	plEast.setBorder( new TitledBorder(""));
     	plEast.setPreferredSize(new Dimension(100, frame_height));
     	plEast.setFont(new Font("verdana", Font.PLAIN, font_size));	
     	plEast.addMouseListener( this );
@@ -176,7 +176,7 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
 		if ( str.equals("") ) return;
 		message.set( paint.getUser(), str, null); 
 
-		Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message), paint.getGroup()) );
+		Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message), paint.getGroup(), null) );
 		thr.start() ;
 		try { thr.join(); } catch (InterruptedException f )  { }
 
@@ -198,7 +198,7 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
 				if ( str.equals("") ) return;
 				message.set( paint.getUser(), str, null); 
 
-				Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message), paint.getGroup()) );
+				Thread thr = new BrushStrokeSender( paint.getOutput(), new BrushStroke(0,0,-2,0,null,paint.getUser(),new Message(message), paint.getGroup(), null) );
 				thr.start() ;
 				try { thr.join(); } catch (InterruptedException f )  { }
 
