@@ -99,7 +99,7 @@ class VisitorSet implements Serializable {
      return a;
   }
   public void add( String visitorList ) {
-     System.out.printf("Visitotliet to be added into visitor set: [%s]\n", visitorList);
+     System.out.printf("Visitor to be added into visitor set: [%s]\n", visitorList);
      StringTokenizer token = new StringTokenizer( visitorList, "" + SEPARATOR);
      while ( token.hasMoreTokens() ) 
 	vs.add ( new Visitor ( Integer.parseInt(token.nextToken()),  token.nextToken() ) );

@@ -15,6 +15,7 @@ public class BrushStrokeSender extends Thread{
         try {
                 out.writeObject(stroke);
                 out.flush();
+                out.reset();
         } catch( IOException e ) { System.out.println("IO FAILED"); e.printStackTrace(); }
     }
 }

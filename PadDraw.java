@@ -1,7 +1,9 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -24,6 +26,7 @@ public class PadDraw extends JComponent{
     private Color current = Color.BLACK;
     private Boolean bgImage = false;
 
+    public PadDraw() {};
     public PadDraw(Paint2 p){
         paint2 = p;
         setDoubleBuffered(false);
@@ -31,10 +34,11 @@ public class PadDraw extends JComponent{
             public void mousePressed(MouseEvent e){
                 oldX = e.getX();
                 oldY = e.getY();
+                if (paint2.getBrushShape() == BrushStroke.TEXT) return;
                 if (paint2.getConnected()) {
                     if (paint2.getBrushShape() != BrushStroke.LINE && paint2.getBrushShape() != BrushStroke.PEN) {
                         Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldX, oldY, paint2.getBrushShape(),
-                                paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null));
+                                paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null, null, null));
                         send.start();
                         try { send.join(); } catch (InterruptedException f )  { }
                     }
@@ -49,11 +53,18 @@ public class PadDraw extends JComponent{
                 repaint();
             }
             public void mouseReleased(MouseEvent e) {
+            	if (paint2.getBrushShape() == BrushStroke.TEXT) {
+            		paint2.textPaint.setBounds(oldX, oldY, 500, 300);
+            		paint2.textPaint.paintString.setText("");
+            		paint2.textPaint.setXY(oldX, oldY);
+            		paint2.textPaint.setVisible(true);
+            		return;
+            	}
                 if (paint2.getBrushShape() == BrushStroke.LINE) {
                     newLineX = e.getX(); newLineY = e.getY();
                     if (paint2.getConnected()) {
                         Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldLineX, newLineX, oldLineY, newLineY, 
-                                paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null));
+                                paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null, null, null));
                         send.start();
                         try { send.join(); } catch (InterruptedException f )  { }
                     }
@@ -86,13 +97,13 @@ public class PadDraw extends JComponent{
                     if (paint2.getBrushShape() != BrushStroke.LINE) {
                         if (paint2.getBrushShape() == BrushStroke.PEN) {
                             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(oldX, currentX, oldY, currentY, 
-                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null));
+                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null, null, null));
                             send.start();
                             try { send.join(); } catch (InterruptedException f )  { }
                         }
                         else {
                             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(currentX, currentY, 
-                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null));
+                                    paint2.getBrushShape(), paint2.getBrushSize(), paint2.isEraseMode()? paint2.getBgColor() : current, paint2.getUser(), null, paint2.getGroup(), null, null, null));
                             send.start();
                             try { send.join(); } catch (InterruptedException f )  { }
                         }
@@ -117,6 +128,10 @@ public class PadDraw extends JComponent{
         //it repaints it and sets oldX and oldY as currentX and currentY
     }
     
+    
+    /*This is the Method that can paint from another source other than
+     * the mouse motion and mouse listeners.
+     * */
     public void paintBrushStroke(BrushStroke stroke) {
         if(graphics2D != null) {
             graphics2D.setColor(stroke.getColor());
@@ -129,9 +144,13 @@ public class PadDraw extends JComponent{
                 graphics2D.drawLine(stroke.getOldX(), stroke.getOldY(), stroke.getNewX(), stroke.getNewY());
                 graphics2D.setStroke(new BasicStroke(1));
             }
+            if (stroke.getType() == BrushStroke.TEXT) {
+            	paintTextStroke(stroke.getOldX(), stroke.getOldY(), stroke.getPaintText(), stroke.getPaintFont(), stroke.getColor());
+            }
             if (stroke.getType() == BrushStroke.BACKGROUND) {
             	if (stroke.getImage() == null) paint2.setBgColor(stroke.getColor());
             	else {
+            		if (stroke.getImage().get() != null) System.out.println(stroke.getImage().get());
             		openedImage = stroke.getImage().get();
             		bgImage = true;
             		clear(true);
@@ -142,6 +161,23 @@ public class PadDraw extends JComponent{
             graphics2D.setColor(current);
         }
         repaint();
+    }
+    
+    public void paintTextStroke(int x, int y, String text, Font font, Color color) {
+    	if (font != null) graphics2D.setFont(font);
+    	graphics2D.setColor(color);
+    	if ((!text.equals("") && text != null) && font != null) {
+	    	int count = 0;
+	    	for (String line : text.split("\n")) {
+	    		if (count == 0) {
+	    			graphics2D.drawString(line, x, y);
+	    			count++;
+	    		}
+	    		else graphics2D.drawString(line, x, y += graphics2D.getFontMetrics().getHeight());
+	    	}
+	    	repaint();
+    	}
+    	else return;
     }
 
     public void paintComponent(Graphics g){
@@ -169,9 +205,9 @@ public class PadDraw extends JComponent{
         	if (bgImage) {
         		graphics2D.drawImage(openedImage, 0, 0, width, height, null);
         		if (paint2.getConnected()) {
-        			SerializableBufferedImage sImage = new SerializableBufferedImage(openedImage);
+        			SerializableBufferedImage sImage = new SerializableBufferedImage(image);
                     Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                            Color.WHITE, paint2.getUser(), null, paint2.getGroup(), sImage));
+                            Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null, null, sImage));
                     send.start();
                     try { send.join(); } catch (InterruptedException f )  { }
                 }
@@ -183,7 +219,7 @@ public class PadDraw extends JComponent{
         		graphics2D.setPaint(current);
         		if (paint2.getConnected()) {
                     Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                            paint2.getBgColor(), paint2.getUser(), null, paint2.getGroup(), null));
+                            paint2.getBgColor(), paint2.getUser(), null, paint2.getGroup(), null, null, null));
                     send.start();
                     try { send.join(); } catch (InterruptedException f )  { }
                 }
@@ -194,12 +230,12 @@ public class PadDraw extends JComponent{
     		graphics2D.setPaint(Color.WHITE);
     		graphics2D.fillRect(0, 0, width, height);
     		graphics2D.setPaint(current);
-    		if (paint2.getConnected()) {
+    		/*if (paint2.getConnected()) {
                 Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
                         Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null));
                 send.start();
                 try { send.join(); } catch (InterruptedException f )  { }
-            }
+            }*/
     		//repaint();
         }
         repaint();
@@ -218,18 +254,19 @@ public class PadDraw extends JComponent{
     public void setImage(File file) {
         try {
         	openedImage = ImageIO.read(file);
+        	openedImage.getScaledInstance(width, height, Image.SCALE_DEFAULT);
             //image = ImageIO.read(file);
         	//graphics2D.drawImage(openedImage, 0, 0, width, height, null);
         	bgImage = true;
         	clear(true);
-        } catch (IOException e) {}
+        } catch (IOException e) { e.printStackTrace(); }
         
         if (paint2.getConnected()) {
-        	SerializableBufferedImage sImage = new SerializableBufferedImage(openedImage);
+        	SerializableBufferedImage sImage = new SerializableBufferedImage(image);
             Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                    Color.WHITE, paint2.getUser(), null, paint2.getGroup(), sImage));
+                    Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null, null, sImage));
             send.start();
-            try { send.join(); } catch (InterruptedException f )  { }
+            try { send.join(); } catch (InterruptedException f )  { f.printStackTrace(); }
         }
     }
     

@@ -25,7 +25,7 @@ public class Login extends JFrame{
 		setSize(250,120);
 		setVisible(false);
 		
-		username.setText("sdunning");
-		password.setText("testpassword");
+		username.setText("");
+		password.setText("");
 	}
 }

@@ -7,7 +7,7 @@ import javax.swing.JTextArea;
 public class BrushStrokeReciever extends Thread {
     private ObjectInputStream in = null;
     private PadDraw drawPad = null;
-    private BrushStroke stroke = null;
+    //private BrushStroke stroke = null;
     private Message message = null;
     private Paint2 paint = null;
     private Chat chat = null;
@@ -24,7 +24,9 @@ public class BrushStrokeReciever extends Thread {
         if ( in == null ||  drawPad == null || paint == null || chat == null) return;
         while (!exit) {
             try {
+            	BrushStroke stroke = null;
             	stroke = (BrushStroke) in.readObject();
+            	//in.reset();
             	System.out.printf("RECEIVER: [ %s ]\n", stroke);
             	if ((stroke != null) && (stroke.message != null)) {
             		System.out.printf("MESSAGE: [ %s ]\n",stroke.message.message);
