@@ -58,6 +58,7 @@ public class PadDraw extends JComponent{
             		paint2.textPaint.paintString.setText("");
             		paint2.textPaint.setXY(oldX, oldY);
             		paint2.textPaint.setVisible(true);
+            		paint2.textPaint.setAlwaysOnTop(true);
             		return;
             	}
                 if (paint2.getBrushShape() == BrushStroke.LINE) {
@@ -152,11 +153,11 @@ public class PadDraw extends JComponent{
             	else {
             		if (stroke.getImage().get() != null) System.out.println(stroke.getImage().get());
             		openedImage = stroke.getImage().get();
+            		openedImage.getScaledInstance(width, height, Image.SCALE_DEFAULT);
+            		System.out.printf("TESTING OPENEDIMAGE : %s\n", openedImage);
             		bgImage = true;
-            		clear(true);
+            		graphics2D.drawImage(openedImage, 0, 0, width, height, null);
             	}
-                graphics2D.setPaint(paint2.getBgColor());
-                graphics2D.fillRect(0, 0, width, height);
             }
             graphics2D.setColor(current);
         }
@@ -204,47 +205,34 @@ public class PadDraw extends JComponent{
         if (background) {
         	if (bgImage) {
         		graphics2D.drawImage(openedImage, 0, 0, width, height, null);
-        		if (paint2.getConnected()) {
-        			SerializableBufferedImage sImage = new SerializableBufferedImage(image);
-                    Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                            Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null, null, sImage));
-                    send.start();
-                    try { send.join(); } catch (InterruptedException f )  { }
-                }
+        		repaint();
+        		return;
         	}
-        	else {
-        		bgImage = false;
-        		graphics2D.setPaint(paint2.getBgColor());
-        		graphics2D.fillRect(0, 0, width, height);
-        		graphics2D.setPaint(current);
-        		if (paint2.getConnected()) {
-                    Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                            paint2.getBgColor(), paint2.getUser(), null, paint2.getGroup(), null, null, null));
-                    send.start();
-                    try { send.join(); } catch (InterruptedException f )  { }
-                }
-        	}
+    		bgImage = false;
+    		graphics2D.setPaint(paint2.getBgColor());
+    		graphics2D.fillRect(0, 0, width, height);
+    		graphics2D.setPaint(current);
+    		if (paint2.getConnected()) {
+                Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
+                        paint2.getBgColor(), paint2.getUser(), null, paint2.getGroup(), null, null, null));
+                send.start();
+                try { send.join(); } catch (InterruptedException f )  { }
+            }
         }
         else {
         	bgImage = false;
     		graphics2D.setPaint(Color.WHITE);
     		graphics2D.fillRect(0, 0, width, height);
     		graphics2D.setPaint(current);
-    		/*if (paint2.getConnected()) {
+    		if (paint2.getConnected()) {
                 Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                        Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null));
+                        Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null, null, null));
                 send.start();
                 try { send.join(); } catch (InterruptedException f )  { }
-            }*/
-    		//repaint();
+    		}
         }
         repaint();
-        /*if (paint2.getConnected()) {
-            Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, bgImage? BrushStroke.BGIMAGE : BrushStroke.BACKGROUND, 0, 
-                    background? paint2.getBgColor() : Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null));
-            send.start();
-            try { send.join(); } catch (InterruptedException f )  { }
-        }*/
+
     }
     //this is the clear
     //it sets the colors as white
@@ -258,16 +246,22 @@ public class PadDraw extends JComponent{
             //image = ImageIO.read(file);
         	//graphics2D.drawImage(openedImage, 0, 0, width, height, null);
         	bgImage = true;
-        	clear(true);
         } catch (IOException e) { e.printStackTrace(); }
         
-        if (paint2.getConnected()) {
-        	SerializableBufferedImage sImage = new SerializableBufferedImage(image);
-            Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
-                    Color.WHITE, paint2.getUser(), null, paint2.getGroup(), null, null, sImage));
-            send.start();
-            try { send.join(); } catch (InterruptedException f )  { f.printStackTrace(); }
-        }
+        if (bgImage) {
+    		graphics2D.drawImage(openedImage, 0, 0, width, height, null);
+    		if (paint2.getConnected()) {
+    			SerializableBufferedImage sImage = new SerializableBufferedImage(image);
+                Thread send = new BrushStrokeSender(paint2.getOutput(), new BrushStroke(0, 0, 0, 0, BrushStroke.BACKGROUND, 0, 
+                        null, paint2.getUser(), null, paint2.getGroup(), null, null, sImage));
+                send.start();
+                try { send.join(); } catch (InterruptedException f )  { }
+            }
+    		else {
+        		graphics2D.drawImage(openedImage, 0, 0, width, height, null);
+        		repaint();
+    		}
+    	}
     }
     
     public void setColor(Color c) {

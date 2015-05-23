@@ -16,6 +16,9 @@ public class SaveBox implements ActionListener{
     private String fileType = "";
     private String fileName = "";
     
+    private Color bgGUI = new Color(198, 255, 125);
+    private Color buttonColor = new Color(195, 252, 219);
+    
     private BufferedImage imageToSave = null;
     private File file = null;
     
@@ -41,6 +44,13 @@ public class SaveBox implements ActionListener{
         imageType.addActionListener(this);
         save.addActionListener(this);
         cancel.addActionListener(this);
+        
+        saveBox.getContentPane().setBackground(bgGUI);
+        save.setBackground(buttonColor);
+        cancel.setBackground(buttonColor);
+        imageType.setBackground(buttonColor);
+        north.setBackground(bgGUI);
+        south.setBackground(bgGUI);
         
         saveBox.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         saveBox.setSize(220, 100);

@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +15,14 @@ public class Login extends JFrame{
 	protected JButton login = new JButton("Login");
 	protected JButton cancel = new JButton("Cancel");
 	
+	private Color bgGUI = new Color(198, 255, 125);
+    private Color buttonColor = new Color(195, 252, 219);
+	
 	public Login(String title) {
+		this.getContentPane().setBackground(bgGUI);
+		login.setBackground(buttonColor);
+		cancel.setBackground(buttonColor);
+		
 		setLocationRelativeTo(null);
 		setTitle(title);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

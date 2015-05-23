@@ -30,6 +30,9 @@ public class WindowedColorChooser extends JComponent implements ChangeListener, 
     private Color color = Color.BLACK;
     private int red = 0, green = 0, blue = 0, alpha = 0;
     
+    private Color bgGUI = new Color(198, 255, 125);
+    private Color buttonColor = new Color(195, 252, 219);
+    
     // Constructors //
     public WindowedColorChooser() { init(); } // Create Default object
     public WindowedColorChooser(String title) { chooserFrame.setTitle(title); init(); } // Create object with specific title
@@ -49,12 +52,27 @@ public class WindowedColorChooser extends JComponent implements ChangeListener, 
                 setVisible(false);
             }
         } );
+        
+        this.setBackground(bgGUI);
+        chooserFrame.setBackground(bgGUI);
+        changeBackGround(colorChooser, bgGUI);
+        ok.setBackground(buttonColor);
         chooserFrame.setSize(new Dimension(600, 400));
         chooserFrame.setLayout(new BorderLayout());
         chooserFrame.add(colorChooser, BorderLayout.CENTER);
         colorChooser.getSelectionModel().addChangeListener(this);
         ok.addActionListener(this);
         chooserFrame.add(ok, BorderLayout.SOUTH);
+    }
+    
+    private void changeBackGround(Container container, Color color) {
+    	container.setBackground(color);
+    	for (Component component : container.getComponents()) {
+    		if (component instanceof Container)
+    			changeBackGround((Container) component, color);
+    		else
+    			component.setBackground(color);
+    	}
     }
 
     @Override

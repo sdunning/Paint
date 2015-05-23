@@ -10,7 +10,7 @@ public class Server {
 
     static Monitor		mtr =  new Monitor();
     static Socket		csk =  null;
-    static ServerSocket	ssk =  null, ssi = null;
+    static ServerSocket	ssk =  null;
     static Scanner		scn = new Scanner( System.in);
     static int			vID = 0;
 
@@ -18,7 +18,6 @@ public class Server {
         try {
         	System.out.println("Server started...");
             ssk = new ServerSocket( 8704);
-            ssi = new ServerSocket ( 8705);
 	    	while ( true ) {
 	    	    csk = ssk.accept();
 	    	    (new Thread ( new Agent( mtr,  csk, ++vID ) ) ).start() ;
@@ -135,8 +134,6 @@ class Agent implements Runnable {
     				}
     			}
     			if(stroke.message != null) stroke.message.message = user.name + " : " + stroke.message.message;
-    			//if(!stroke.getPaintText().equals("") && stroke.getPaintText() != null) stroke.setPaintText(stroke.getPaintText());
-    			//if(stroke.getPaintFont() != null) stroke.setPaintFont(stroke.getPaintFont());
     			System.out.printf("\n%s\n", stroke.getPaintText() == null? "Text is NULL" : stroke.getPaintText());
     			System.out.printf("\n%s\n", stroke.getPaintFont() == null? "Font is NULL" : stroke.getPaintFont());
     			System.out.println(":::::::\n\n");

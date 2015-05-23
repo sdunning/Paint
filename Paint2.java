@@ -102,7 +102,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
     private String username = "";
     private String password = "";
     private int group = -1;
-    private Font paintFont = new Font("veranda", Font.PLAIN, 12);
+    private Font paintFont = new Font("Arial", Font.PLAIN, 12);
     
     private ImageIcon redWifi = new ImageIcon("client_images/redcnct20px-01.png");
     private ImageIcon greenWifi = new ImageIcon("client_images/greencnct20px-01.png");
@@ -158,6 +158,7 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
         initSliders();
         //panWest.add(sldBrushSize);
         //panWest.setBackground(bgGUI);
+        changeBackGround(fileChooser, bgGUI);
         panNorth.setLayout(new BorderLayout());
         panNorth.setBackground(bgGUI);
         
@@ -684,8 +685,9 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
            }
            if (obj == textPaint.paint) {
         	   textPaint.setVisible(false);
+        	   textPaint.setAlwaysOnTop(false);
         	   if (connected) {
-        		   Thread send = new BrushStrokeSender(out, new BrushStroke(textPaint.getX(), textPaint.getY(), BrushStroke.TEXT, 0, null, 
+        		   Thread send = new BrushStrokeSender(out, new BrushStroke(textPaint.getX(), textPaint.getY(), BrushStroke.TEXT, 0, current, 
         				   username, null, group, textPaint.getText(), textPaint.getFont(), null));
                    send.start();
                    try { send.join(); } catch (InterruptedException f )  { }
@@ -822,6 +824,16 @@ public class Paint2 extends JApplet implements ActionListener/*, ChangeListener/
             * Pallet
             */
            
+       }
+       
+       private void changeBackGround(Container container, Color color) {
+       	container.setBackground(color);
+       	for (Component component : container.getComponents()) {
+       		if (component instanceof Container)
+       			changeBackGround((Container) component, color);
+       		else
+       			component.setBackground(color);
+       	}
        }
        
        public Color getColor(boolean erase) { if(erase) return bgColor; else return current; }
