@@ -15,9 +15,9 @@ public class GroupChooser extends JFrame implements ActionListener {
 	JPanel buttonPanel = new JPanel();
 	Container c = null;
 	int groupNum = -1;
-	Paint2 paint = null;
+	CommunityCanvas paint = null;
 	
-	public GroupChooser(Paint2 paint) {
+	public GroupChooser(CommunityCanvas paint) {
 		c = this.getContentPane();
 		this.setVisible(false);
 		this.paint = paint;

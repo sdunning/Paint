@@ -9,14 +9,14 @@ public class BrushStrokeReciever extends Thread {
     private PadDraw drawPad = null;
     //private BrushStroke stroke = null;
     private Message message = null;
-    private Paint2 paint = null;
+    private CommunityCanvas paint = null;
     private Chat chat = null;
     private Boolean exit = false;
     private Object obj = null;
     private JTextArea ta = null;
     private CustomChatBox box = null;
     
-    public BrushStrokeReciever(ObjectInputStream in, PadDraw pad, Paint2 paint, Chat chat, CustomChatBox box) {
+    public BrushStrokeReciever(ObjectInputStream in, PadDraw pad, CommunityCanvas paint, Chat chat, CustomChatBox box) {
         this.in = in; drawPad = pad; this.paint = paint; this.chat = chat; this.box = box; //this.ta = ta;
     }
     
@@ -26,11 +26,9 @@ public class BrushStrokeReciever extends Thread {
             try {
             	BrushStroke stroke = null;
             	stroke = (BrushStroke) in.readObject();
-            	//in.reset();
             	System.out.printf("RECEIVER: [ %s ]\n", stroke);
             	if ((stroke != null) && (stroke.message != null)) {
             		System.out.printf("MESSAGE: [ %s ]\n",stroke.message.message);
-            		//ta.append( stroke.message.message + "\n" );
             		box.appendString(stroke.message.message, ":", chat.visitorSet);
             		chat.visitorSet.clear();
             		if (stroke.message.visitorList != null) { 

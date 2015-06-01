@@ -10,10 +10,10 @@ import java.util.* ;
 	
 public class Chat extends JPanel implements ActionListener, MouseListener, KeyListener  {
 
-	CustomChatBox box = new CustomChatBox();
+	CustomChatBox box = null;
     int		port = 8705;
     int		frame_height = 350;
-    int		font_size = 9;
+    int		font_size = 12;
     public JTextArea txt = new JTextArea();
     JButton send = new JButton();
     JPanel	pl = new JPanel();
@@ -30,10 +30,12 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
     Visitor	me 	= new Visitor();
     VisitorSet	visitorSet = new VisitorSet(); // new VisitorSet(); 
     VisitorSet   privateList = null;
-    Paint2 paint = null;
+    CommunityCanvas paint = null;
 
-    public Chat(Paint2 paint) { 
-	    this.paint = paint; init();
+    public Chat(CommunityCanvas paint) { 
+	    this.paint = paint;
+	    box = new CustomChatBox(paint);
+	    init();
     }
    
     public void init() {
@@ -42,7 +44,7 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
     	this.setLayout( new BorderLayout() );
     	plEast.setBorder( new TitledBorder(""));
     	plEast.setPreferredSize(new Dimension(100, frame_height));
-    	plEast.setFont(new Font("verdana", Font.PLAIN, font_size));	
+    	plEast.setFont(new Font("arial", Font.BOLD, font_size));	
     	plEast.addMouseListener( this );
 
     	plSouth.setLayout(new BorderLayout());
@@ -76,7 +78,7 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
        // paintVisitors();
     }
 
-   final int xStart = 8, yStart = 30, yGap = 9;
+   final int xStart = 8, yStart = 30, yGap = 12;
 
    public void checkVisitor( int y ) {
 
@@ -137,12 +139,12 @@ public class Chat extends JPanel implements ActionListener, MouseListener, KeyLi
 
        g.setColor( plEast.getBackground() );
        g.fillRect(8, 20, plEast.getWidth() - 12, plEast.getHeight() - 25 );
-       g.setColor( Color.blue);
+       g.setColor( new Color(132, 15, 118));
        Iterator<Visitor> itr = visitorSet.iterator();
        Visitor v = null;
        while ( itr.hasNext() ) {
 	   v = itr.next();
-	   g.setColor( v.checked ? Color.red: Color.blue);
+	   g.setColor( v.checked ? Color.red: new Color(132, 15, 118));
 	   g.drawString(v.toShortString() , xStart, yStart + k * yGap );
 	   k++;
 	   // System.out.printf("Paint visit [%d], %s\n", k, v.toShortString());

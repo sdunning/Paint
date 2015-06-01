@@ -67,12 +67,6 @@ class Group {
 	}
 	
 	public BufferedImage getCanvas() { return canvas.image; }
-	
-	/*@Override
-	public String toString() {
-		String str = "";
-		for (int i=0; i<)
-	}*/
 }
 
 class Agent implements Runnable {
@@ -81,7 +75,6 @@ class Agent implements Runnable {
     IndexedOutput	    idxOut = null;
     Monitor		        mtr = null;
     Visitor             user = null;
-    //BrushStroke		    stroke = null; 
     Message             message = null;
     int			        vID;
     Group               group = null;
@@ -101,7 +94,6 @@ class Agent implements Runnable {
     		while ( true ) {
     			BrushStroke stroke = null;
     			stroke = (BrushStroke) in.readObject();
-    			//in.reset();
     			System.out.printf("Server  : [ %s ]", stroke);
     			if (stroke.getType() == -3) {
     				mtr.remove ( user, idxOut );

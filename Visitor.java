@@ -40,7 +40,7 @@ public class Visitor implements Comparable<Visitor>, Serializable {
 		checked ? "yes" : "no");
 	}
     public String  toShortString() {
-         return String.format("%s", name + " (" + ID + ')');
+         return String.format("%s", name);
 	}
 
 }

@@ -11,6 +11,9 @@ public class BrushStroke implements Serializable{
     public static final int LINE = 3;
     public static final int TEXT = 4;
     public static final int BACKGROUND = 9;
+    public static final int BACKGROUNDIMAGE = 10;
+    public static final int CLEARFOREGROUND = 11;
+    public static final int CLEARBACKGROUND = 12;
     
     private static final long serialVersionUID = 1052570845038232579L;
     private int newX = 0, oldX = 0;
